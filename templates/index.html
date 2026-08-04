@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Resume Analyser — ATS Score & Skill Gap Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="scanline-overlay" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="eyebrow">AI RESUME ANALYSER</div>
+      <h1>Get your resume past<br />the scanner.</h1>
+      <p class="subhead">
+        Upload your resume for an instant ATS compatibility score, a skill-gap
+        breakdown against any job description, and specific fixes to raise your
+        odds - no sign-up, nothing stored.
+      </p>
+    </header>
+
+    <main>
+      <section class="upload-card" id="uploadCard">
+        <form id="analyzeForm">
+          <div class="dropzone" id="dropzone">
+            <input
+              type="file"
+              id="resumeFile"
+              name="resume"
+              accept=".pdf,.docx,.txt"
+              hidden
+            />
+            <div class="dropzone-inner" id="dropzoneInner">
+              <div class="dropzone-icon">⌷</div>
+              <p class="dropzone-title">Drop your resume here</p>
+              <p class="dropzone-sub">or click to browse - PDF, DOCX, or TXT</p>
+            </div>
+            <div class="file-chip" id="fileChip" hidden>
+              <span id="fileName"></span>
+              <button type="button" id="removeFile" aria-label="Remove file">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div class="jd-field">
+            <label for="jobDescription">
+              Job description
+              <span class="optional-tag"
+                >optional — for a precise skill-gap match</span
+              >
+            </label>
+            <textarea
+              id="jobDescription"
+              name="job_description"
+              rows="5"
+              placeholder="Paste the job listing here to compare your resume against it..."
+            ></textarea>
+          </div>
+
+          {% if llm_available %}
+          <label class="llm-toggle">
+            <input type="checkbox" id="useLlm" name="use_llm" />
+            <span
+              >Also generate AI-written suggestions (uses your configured LLM
+              API key)</span
+            >
+          </label>
+          {% endif %}
+
+          <button type="submit" class="scan-button" id="scanButton">
+            <span class="scan-button-label">Scan Resume</span>
+          </button>
+          <p class="error-msg" id="errorMsg" hidden></p>
+        </form>
+      </section>
+
+      <section class="results" id="results" hidden>
+        <div class="results-top">
+          <div class="gauge-panel">
+            <div class="gauge" id="gauge">
+              <svg viewBox="0 0 200 200">
+                <circle class="gauge-track" cx="100" cy="100" r="86"></circle>
+                <circle
+                  class="gauge-fill"
+                  id="gaugeFill"
+                  cx="100"
+                  cy="100"
+                  r="86"
+                ></circle>
+              </svg>
+              <div class="gauge-center">
+                <span class="gauge-number" id="gaugeNumber">0</span>
+                <span class="gauge-max">/100</span>
+              </div>
+            </div>
+            <p class="gauge-label" id="gaugeLabel">ATS Compatibility Score</p>
+          </div>
+
+          <div class="breakdown-panel">
+            <p class="panel-title">Score Breakdown</p>
+            <div class="breakdown-list" id="breakdownList"></div>
+          </div>
+        </div>
+
+        <div class="results-mid">
+          <div class="skills-panel">
+            <p class="panel-title" id="matchedTitle">Skills Found</p>
+            <div class="chip-row" id="matchedChips"></div>
+          </div>
+          <div class="skills-panel" id="missingPanel">
+            <p class="panel-title">Skill Gaps</p>
+            <div class="chip-row" id="missingChips"></div>
+          </div>
+        </div>
+
+        <div class="suggestions-panel">
+          <p class="panel-title">Improvement Suggestions</p>
+          <ul class="suggestions-list" id="suggestionsList"></ul>
+
+          <div id="llmBlock" hidden>
+            <p class="panel-title llm-title">AI-Generated Suggestions</p>
+            <ul class="suggestions-list llm-list" id="llmSuggestionsList"></ul>
+          </div>
+        </div>
+
+        <button class="reset-button" id="resetButton">
+          Analyze another resume
+        </button>
+      </section>
+
+      <div class="loading-panel" id="loadingPanel" hidden>
+        <div class="loading-beam"></div>
+        <p id="loadingText">Scanning document…</p>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Your privacy comes first. Resume analysis runs locally on your device,
+        and nothing is shared unless you choose to use AI-powered suggestions.
+      </p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
